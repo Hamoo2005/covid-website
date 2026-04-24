@@ -56,6 +56,13 @@ const medicalFieldLabels = {
   ICU: "ICU",
 };
 
+const numericFields = new Set([
+  "MEDICAL_UNIT",
+  "PATIENT_TYPE",
+  "AGE",
+  "CLASIFFICATION_FINAL",
+]);
+
 function App() {
   const [personalInfo, setPersonalInfo] = useState(personalInitialState);
   const [medicalInfo, setMedicalInfo] = useState(medicalInitialState);
@@ -115,6 +122,20 @@ function App() {
     return "";
   };
 
+  const buildMedicalPayload = () => {
+    const normalized = {};
+
+    for (const [field, value] of Object.entries(medicalInfo)) {
+      if (numericFields.has(field)) {
+        normalized[field] = Number(value);
+      } else {
+        normalized[field] = String(value).trim();
+      }
+    }
+
+    return normalized;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
@@ -129,6 +150,9 @@ function App() {
     setIsSubmitting(true);
 
     try {
+      const medicalPayload = buildMedicalPayload();
+      console.log("Submitting medical payload:", medicalPayload);
+
       const response = await fetch(`${API_BASE_URL}/predict`, {
         method: "POST",
         headers: {
@@ -136,7 +160,7 @@ function App() {
         },
         body: JSON.stringify({
           patient_info: personalInfo,
-          medical_inputs: medicalInfo,
+          medical_inputs: medicalPayload,
         }),
       });
 
@@ -542,6 +566,13 @@ function App() {
                 <button className="primary-button full-width" onClick={downloadPdfReport}>
                   Print / Download PDF Report
                 </button>
+
+                {result.debug ? (
+                  <details className="debug-panel">
+                    <summary>Temporary Debug Data</summary>
+                    <pre>{JSON.stringify(result.debug, null, 2)}</pre>
+                  </details>
+                ) : null}
               </>
             ) : (
               <div className="empty-state">

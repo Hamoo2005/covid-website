@@ -59,7 +59,9 @@ def train_and_save_model():
     joblib.dump(list(X.columns), COLUMNS_PATH)
 
     print("Training complete.")
+    print(f"Target distribution: {y.value_counts().to_dict()}")
     print(f"Selected features: {', '.join(selected_features)}")
+    print(f"Model classes: {dt_model.classes_.tolist()}")
     print(f"Accuracy: {accuracy:.4f}")
     print(f"Saved model to: {MODEL_PATH}")
     print(f"Saved selector to: {SELECTOR_PATH}")
